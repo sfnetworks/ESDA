@@ -17,6 +17,8 @@ library(sf)
 library(sfnetworks)
 library(spdep)
 library(tidygraph)
+library(igraph)
+library(dplyr)
 
 # data
 network_column <- st_sfc(
@@ -41,7 +43,7 @@ network_data <- st_as_sf(
 plot(st_geometry(network_data))
 
 # create sfnetwork structure
-sfnetwork_data <- as_sfnetwork(network_data, directed = FALSE)
+sfnetwork_data = as_sfnetwork(network_data, directed = FALSE)
 
 # plot the sfnetwork object
 plot(sfnetwork_data)
@@ -50,4 +52,20 @@ plot(sfnetwork_data)
 ```
 
 
+
+```{r}
+dual = sfnetwork_data %N>% convert(to_linegraph)
+dual
+```
+
+```{r}
+am = igraph::as_adjacency_matrix(dual)
+am_list = spdep::mat2listw(am)
+x = sfnetwork_data %>% activate(edges) %>% pull(x)
+```
+
+```{r}
+mi = moran(x, am_list, igraph::ecount(sfnetwork_data), spdep::Szero(am_list))
+mi
+```
 
