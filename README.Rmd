@@ -11,9 +11,43 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Testing linegraph morphing
 
-ABC
-
 ```{r}
+# packages
+library(sf)
+library(sfnetworks)
+library(spdep)
+library(tidygraph)
 
+# data
+network_column <- st_sfc(
+  st_linestring(matrix(c(0, -2, 0, -1, 0, 0), ncol = 2, byrow = TRUE)), 
+  st_linestring(matrix(c(0, 2, 0, 1, 0, 0), ncol = 2, byrow = TRUE)), 
+  st_linestring(matrix(c(-2, 0, -1, 0, 0, 0), ncol = 2, byrow = TRUE)), 
+  st_linestring(matrix(c(2, 0, 1, 0, 0, 0), ncol = 2, byrow = TRUE)), 
+  st_linestring(matrix(c(2, -2, 2, -1, 2, 0), ncol = 2, byrow = TRUE)),
+  st_linestring(matrix(c(2, 2, 2, 1, 2, 0), ncol = 2, byrow = TRUE)), 
+  st_linestring(matrix(c(2, 0, 3, 0, 4, 0), ncol = 2, byrow = TRUE))
+)
+
+
+# assign some random measurements to all edges
+set.seed(1)
+network_data <- st_as_sf(
+  data.frame(x = runif(7)), 
+  geometry = network_column
+)
+
+# plot
+plot(st_geometry(network_data))
+
+# create sfnetwork structure
+sfnetwork_data <- as_sfnetwork(network_data, directed = FALSE)
+
+# plot the sfnetwork object
+plot(sfnetwork_data)
+
+# create the line graph
 ```
+
+
 
