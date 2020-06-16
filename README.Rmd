@@ -49,23 +49,41 @@ sfnetwork_data = as_sfnetwork(network_data, directed = FALSE)
 plot(sfnetwork_data)
 
 # create the line graph
-```
+# sfnetwork_data %>% convert(to_linegraph)
 
-
-
-```{r}
 dual = sfnetwork_data %N>% convert(to_linegraph)
 dual
-```
 
-```{r}
-am = igraph::as_adjacency_matrix(dual)
-am_list = spdep::mat2listw(am)
-x = sfnetwork_data %>% activate(edges) %>% pull(x)
-```
+# build adj matrix for the edges
+am <- as_adjacency_matrix(dual)
+am
 
-```{r}
-mi = moran(x, am_list, igraph::ecount(sfnetwork_data), spdep::Szero(am_list))
-mi
+am_list <- mat2listw(am, style = "B")
+am_list
+
+val <- sfnetwork_data %>% activate(edges) %>% pull(x)
+
+my_moran <- moran(x = val, listw = am_list, n = ecount(sfnetwork_data), S0 = Szero(am_list))
+my_moran
+
+estimate_my_moran <- function(sfnetwork_object, val) {
+  # 1. Create the dual graph / linegraph
+  sfnetwork_object_dual <- sfnetwork_object %>%
+    convert(to_linegraph)
+  
+  # 2. Estimate adj matrix
+  edge_adj <- as_adjacency_matrix(sfnetwork_object_dual)
+  
+  # 3. Convert to list2format
+  edge_listw <- mat2listw(edge_adj)
+  
+  # 4. extract the data
+  x <- sfnetwork_object %>% activate(edges) %>% pull({{val}})
+  
+  # 5. Estimate moran's I
+  moran(x, edge_listw, ecount(sfnetwork_object), Szero(edge_listw))
+}
+
+estimate_my_moran(sfnetwork_data, x)
 ```
 
